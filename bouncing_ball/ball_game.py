@@ -20,7 +20,10 @@ SCREEN_HEIGHT = 600
 
 # game variable
 wall_thickness = 10
-
+gravity = .5
+bounce_stop = 0.3
+# track positions of mouse to get movement vector
+mouse_trajectory = []
 
 # Define a Player object by extending pygame.sprite.Sprite
 # The surface drawn on the screen is now an attribute of 'player'
@@ -28,7 +31,7 @@ class Player(pygame.sprite.Sprite):
     def __init__(self):
         super(Player, self).__init__()
         self.surf = pygame.Surface((75, 15))
-        self.surf.fill((255, 255, 255))
+        self.surf.fill('maroon')
         self.rect = self.surf.get_rect()
 
         # initial position of the moving rectangle to bottom-left position
@@ -50,18 +53,52 @@ class Player(pygame.sprite.Sprite):
                              
 
 class Ball(pygame.sprite.Sprite):
-    def __init__(self, radius, color):
+    def __init__(self, x_pos, y_pos, radius, color, mass, retention,y_speed, x_speed, id, friction):
         super(Ball, self).__init__()
+        self.x_pos = x_pos
+        self.y_pos = y_pos
         self.radius = radius
         self.color = color
-        self.create_circle_surface()
+        self.mass = mass
+        self.retention = retention
+        self.y_speed = y_speed
+        self.x_speed = x_speed
+        self.id = id
+        self.circle = ''
+        self.selected = False
+        self.friction = friction
+        self.create_circle_surface('green')
         self.rect = self.surf.get_rect()
 
-
-    def create_circle_surface(self):
+    def create_circle_surface(self, color):
+        self.color = color
         diameter = self.radius * 2
         self.surf = pygame.Surface((diameter, diameter), pygame.SRCALPHA)
         pygame.draw.circle(self.surf, self.color, (self.radius, self.radius), self.radius)
+
+    def check_gravity(self):
+        # y_pos bottom er age porjonto gravity + hobe
+        if self.y_pos < SCREEN_HEIGHT - self.radius - (wall_thickness/2):
+            self.y_speed += gravity
+        else:
+            if self.y_speed > bounce_stop:
+                # bounce_stop er beshi hole (-1) opposite direction
+                self.y_speed = self.y_speed * -1 * self.retention
+            else:
+                # bounce_stop er kom hole speed 0 
+                if abs(self.y_speed) <= bounce_stop:
+                    self.y_speed = 0
+        if (self.x_pos<self.radius+ (wall_thickness/2) and self.x_speed < 0) or \
+                (self.x_pos > SCREEN_WIDTH - self.radius - (wall_thickness/2) and self.x_speed > 0):
+            self.x_speed *= -1 * self.retention
+            if abs(self.x_speed) < bounce_stop:
+                self.speed = 0
+        if self.y_speed == 0 and self.x_speed != 0:
+            if self.x_speed > 0:
+                self.x_speed -= self.friction
+            elif self.x_speed < 0:
+                self.x_speed += self.friction
+        return self.y_speed
 
 # Initialize pygame
 pygame.init()
@@ -81,9 +118,10 @@ all_sprites.add(player)
 
 
 # Create a circular sprite
-radius = 10
-color = (255, 255, 255)  # White
-ball = Ball(radius, color)
+# radius = 10
+# color = (255, 255, 255)  # White
+# ball = Ball(radius, color)
+ball = Ball(50, 50, 20, 'slate gray', 100, .8, 0, 0, 1, 0.02)
 # Add the ball sprite to the gball group
 gball.add(ball)
 
@@ -92,10 +130,10 @@ clock = pygame.time.Clock()
 speed = [1, 1]
 
 def draw_walls():
-    left = pygame.draw.line(screen, (255, 255, 255), (0, 0), (0, SCREEN_HEIGHT), wall_thickness)
-    right = pygame.draw.line(screen, 'white', (SCREEN_WIDTH, 0), (SCREEN_WIDTH, SCREEN_HEIGHT), wall_thickness)
-    top = pygame.draw.line(screen, 'white', (0, 0), (SCREEN_WIDTH, 0), wall_thickness)
-    bottom = pygame.draw.line(screen, 'white', (0, SCREEN_HEIGHT), (SCREEN_WIDTH, SCREEN_HEIGHT), wall_thickness)
+    left = pygame.draw.line(screen, 'brown', (0, 0), (0, SCREEN_HEIGHT), wall_thickness)
+    right = pygame.draw.line(screen, 'sea green', (SCREEN_WIDTH, 0), (SCREEN_WIDTH, SCREEN_HEIGHT), wall_thickness)
+    top = pygame.draw.line(screen, 'Teal', (0, 0), (SCREEN_WIDTH, 0), wall_thickness)
+    bottom = pygame.draw.line(screen, 'pink', (0, SCREEN_HEIGHT), (SCREEN_WIDTH, SCREEN_HEIGHT), wall_thickness)
     wall_list = [left, right, top, bottom]
     return wall_list
 
@@ -104,8 +142,8 @@ running = True
 
 # Main loop
 while running:
+    ball.y_speed = ball.check_gravity()
     # for loop through the event queue
-
     for event in pygame.event.get():
         # Check for KEYDOWN event
         if event.type == KEYDOWN:
@@ -116,18 +154,31 @@ while running:
         elif event.type == QUIT:
             running = False
     # Update the position of the ball based on the speed vector
+    # need to add gravity
+    # x position a jebe
+
     ball.rect.x += speed[0]
     ball.rect.y += speed[1]
 
-    if ball.rect.left < 0 or ball.rect.right > SCREEN_WIDTH:
+    if ball.rect.left < 0 :
         speed[0] = -speed[0]
-
+        # ball.surf.fill('brown')
+        ball.create_circle_surface('brown')
+    
+    if ball.rect.right > SCREEN_WIDTH:
+        speed[0] = -speed[0]
+        # ball.surf.fill('sea green')
+        ball.create_circle_surface('sea green')
 
     # if ball.rect.top < 0 or ball.rect.bottom > SCREEN_HEIGHT:
     if ball.rect.top < 0 :
         speed[1] = -speed[1]
+        # ball.surf.fill('Teal')
+        ball.create_circle_surface('Teal')
     if pygame.sprite.spritecollideany(player, gball):
         speed[1] = -speed[1]
+        # ball.surf.fill('maroon')
+        ball.create_circle_surface('maroon')
 
     if  ball.rect.bottom > SCREEN_HEIGHT:
         running = False
@@ -151,6 +202,7 @@ while running:
 
     # Update the display
     pygame.display.flip()
+    screen.fill((0,0,0))
     # Ensure program maintains a rate of 30 frames per second
     clock.tick(250) 
 
