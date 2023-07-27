@@ -18,6 +18,10 @@ from pygame.locals import (
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 
+# game variable
+wall_thickness = 10
+
+
 # Define a Player object by extending pygame.sprite.Sprite
 # The surface drawn on the screen is now an attribute of 'player'
 class Player(pygame.sprite.Sprite):
@@ -87,12 +91,21 @@ gball.add(ball)
 clock = pygame.time.Clock()
 speed = [1, 1]
 
+def draw_walls():
+    left = pygame.draw.line(screen, (255, 255, 255), (0, 0), (0, SCREEN_HEIGHT), wall_thickness)
+    right = pygame.draw.line(screen, 'white', (SCREEN_WIDTH, 0), (SCREEN_WIDTH, SCREEN_HEIGHT), wall_thickness)
+    top = pygame.draw.line(screen, 'white', (0, 0), (SCREEN_WIDTH, 0), wall_thickness)
+    bottom = pygame.draw.line(screen, 'white', (0, SCREEN_HEIGHT), (SCREEN_WIDTH, SCREEN_HEIGHT), wall_thickness)
+    wall_list = [left, right, top, bottom]
+    return wall_list
+
 # Variable to keep the main loop running
 running = True
 
 # Main loop
 while running:
     # for loop through the event queue
+
     for event in pygame.event.get():
         # Check for KEYDOWN event
         if event.type == KEYDOWN:
@@ -124,10 +137,11 @@ while running:
     # Update the player sprite based on user keypresses
     player.update(pressed_keys)
 
-    # Fill the screen with black
-    screen.fill((0, 0, 0))
+    # # Fill the screen with black
+    # screen.fill((0, 0, 0))
 
     screen.fill((0, 0, 0))  # Fill the screen with black
+    walls = draw_walls()
     screen.blit(ball.surf, ball.rect)  # Draw the circular sprite
 
     # Draw the player on the screen
