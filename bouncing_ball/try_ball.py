@@ -1,41 +1,69 @@
-import sys, pygame
+# import pygame module in this program
+import pygame
 
+# activate the pygame library
+# initiate pygame and give permission
+# to use pygame's functionality.
 pygame.init()
 
-size = width, height = 800, 400
+# define the RGB value for white,
+# green, blue colour .
+white = (255, 255, 255)
+green = (0, 255, 0)
+blue = (0, 0, 128)
 
-speed = [1, 1]
+# assigning values to X and Y variable
+X = 400
+Y = 400
 
-background = 255, 255, 255
 
-screen = pygame.display.set_mode(size)
+# create the display surface object
+# of specific dimension..e(X, Y).
+display_surface = pygame.display.set_mode((X, Y))
 
-pygame.display.set_caption("Bouncing ball")
+# create a font object.
+# 1st parameter is the font file
+# which is present in pygame.
+# 2nd parameter is size of the font
+font = pygame.font.Font('freesansbold.ttf', 10)
 
-ball = pygame.image.load("ball.png")
+# create a text surface object,
+# on which text is drawn on it.
+text = font.render('GeeksForGeeks', True, green, blue)
 
-ballrect = ball.get_rect()
+# create a rectangular object for the
+# text surface object
+textRect = text.get_rect()
 
-while 1:
+# set the center of the rectangular object.
+textRect.center = (X//4 , Y // 2)
 
-    for event in pygame.event.get():
+# infinite loop
+while True:
 
-        if event.type == pygame.QUIT:
+	# completely fill the surface object
+	# with white color
+	# display_surface.fill(white)
 
-            sys.exit()
+	# copying the text surface object
+	# to the display surface object
+	# at the center coordinate.
+	display_surface.blit(text, textRect)
 
-    ballrect = ballrect.move(speed)
+	# iterate over the list of Event objects
+	# that was returned by pygame.event.get() method.
+	for event in pygame.event.get():
 
-    if ballrect.left < 0 or ballrect.right > width:
+		# if event object type is QUIT
+		# then quitting the pygame
+		# and program both.
+		if event.type == pygame.QUIT:
 
-        speed[0] = -speed[0]
+			# deactivates the pygame library
+			pygame.quit()
 
-    if ballrect.top < 0 or ballrect.bottom > height:
+			# quit the program.
+			quit()
 
-        speed[1] = -speed[1]
-
-    screen.fill(background)
-
-    screen.blit(ball, ballrect)
-
-    pygame.display.flip()
+		# Draws the surface object to the screen.
+		pygame.display.update()

@@ -1,6 +1,6 @@
 # Import the pygame module
 import pygame
-
+from pygame.locals import *
 # # Import random for random numbers
 # import random
 
@@ -20,6 +20,7 @@ SCREEN_HEIGHT = 600
 
 # game variable
 wall_thickness = 10
+wall_thickness1 = 60
 gravity = .5
 bounce_stop = 0.3
 # track positions of mouse to get movement vector
@@ -35,7 +36,7 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.surf.get_rect()
 
         # initial position of the moving rectangle to bottom-left position
-        self.rect.topleft = (0, SCREEN_HEIGHT - self.rect.height)
+        self.rect.topleft = (0, SCREEN_HEIGHT - self.rect.height- wall_thickness1/2)
 
     # Move the sprite based on user keypresses
     def update(self, pressed_keys):
@@ -133,12 +134,32 @@ def draw_walls():
     left = pygame.draw.line(screen, 'brown', (0, 0), (0, SCREEN_HEIGHT), wall_thickness)
     right = pygame.draw.line(screen, 'sea green', (SCREEN_WIDTH, 0), (SCREEN_WIDTH, SCREEN_HEIGHT), wall_thickness)
     top = pygame.draw.line(screen, 'Teal', (0, 0), (SCREEN_WIDTH, 0), wall_thickness)
-    bottom = pygame.draw.line(screen, 'pink', (0, SCREEN_HEIGHT), (SCREEN_WIDTH, SCREEN_HEIGHT), wall_thickness)
+    bottom = pygame.draw.line(screen, 'pink', (0, SCREEN_HEIGHT), (SCREEN_WIDTH, SCREEN_HEIGHT), wall_thickness1)
     wall_list = [left, right, top, bottom]
     return wall_list
 
+# create a font object.
+font = pygame.font.Font('freesansbold.ttf', 20)
+black = (0, 0, 0)
+green = (0, 255, 0)
+blue = (0, 0, 128)
+white = (255, 255, 255)
+
+def print_text( x_pos, y_pos, text, color):
+    x = x_pos
+    y = y_pos
+    t = text
+    c = color
+    text = font.render(t, True, c)
+    textRect = text.get_rect()
+    textRect.center = (x , y)
+    screen.blit(text, textRect)
+
 # Variable to keep the main loop running
 running = True
+paused = False
+restart = False
+score = 0
 
 # Main loop
 while running:
@@ -150,15 +171,29 @@ while running:
             # If the Esc key is pressed, then exit the main loop
             if event.key == K_ESCAPE:
                 running = False
+
+            elif event.key == K_p:
+                paused = True
+
+            elif event.key == K_r:
+                paused = False 
+
+
+
         # Check for QUIT event. If QUIT, then set running to false.
         elif event.type == QUIT:
             running = False
     # Update the position of the ball based on the speed vector
     # need to add gravity
     # x position a jebe
+    screen.fill((0, 0, 0))  # Fill the screen with black
+    if not paused:
+        ball.rect.x += speed[0]
+        ball.rect.y += speed[1]
+    if paused:
+        print_text(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, "Paused", white)
 
-    ball.rect.x += speed[0]
-    ball.rect.y += speed[1]
+    
 
     if ball.rect.left < 0 :
         speed[0] = -speed[0]
@@ -167,17 +202,15 @@ while running:
     
     if ball.rect.right > SCREEN_WIDTH:
         speed[0] = -speed[0]
-        # ball.surf.fill('sea green')
         ball.create_circle_surface('sea green')
 
-    # if ball.rect.top < 0 or ball.rect.bottom > SCREEN_HEIGHT:
     if ball.rect.top < 0 :
         speed[1] = -speed[1]
-        # ball.surf.fill('Teal')
         ball.create_circle_surface('Teal')
     if pygame.sprite.spritecollideany(player, gball):
         speed[1] = -speed[1]
-        # ball.surf.fill('maroon')
+        score = score + 50 
+        # print_text( 100 , SCREEN_HEIGHT - wall_thickness1/4, str(score) , black)
         ball.create_circle_surface('maroon')
 
     if  ball.rect.bottom > SCREEN_HEIGHT:
@@ -189,20 +222,29 @@ while running:
     # Update the player sprite based on user keypresses
     player.update(pressed_keys)
 
-    # # Fill the screen with black
-    # screen.fill((0, 0, 0))
+    # screen.fill((0, 0, 0))  # Fill the screen with black
 
-    screen.fill((0, 0, 0))  # Fill the screen with black
+    # if not paused:
+    #     ball.rect.x += speed[0]
+    #     ball.rect.y += speed[1]
+    # if paused:
+    #     print_text(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, "Paused", white)
+    
     walls = draw_walls()
+    # screen.blit(text, textRect)
+    print_text( 50 , SCREEN_HEIGHT - wall_thickness1/4, 'Score : ', black)
+    print_text( 100 , SCREEN_HEIGHT - wall_thickness1/4, str(score) , black)
+
+    print_text(650, SCREEN_HEIGHT - wall_thickness1/4, 'Highest Score : ', black)
+
     screen.blit(ball.surf, ball.rect)  # Draw the circular sprite
 
     # Draw the player on the screen
     screen.blit(player.surf, player.rect)
 
-
     # Update the display
     pygame.display.flip()
-    screen.fill((0,0,0))
+
     # Ensure program maintains a rate of 30 frames per second
     clock.tick(250) 
 

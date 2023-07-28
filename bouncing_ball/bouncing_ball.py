@@ -99,12 +99,14 @@ def draw_walls():
     wall_list = [left, right, top, bottom]
     return wall_list
 
+
 # Variable to keep the main loop running
 running = True
 
 # Main loop
 while running:
     # for loop through the event queue
+
 
     for event in pygame.event.get():
         # Check for KEYDOWN event
@@ -142,6 +144,7 @@ while running:
     # screen.fill((0, 0, 0))
 
     screen.fill((0, 0, 0))  # Fill the screen with black
+
     walls = draw_walls()
     screen.blit(ball.surf, ball.rect)  # Draw the circular sprite
 
