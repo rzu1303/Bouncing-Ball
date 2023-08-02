@@ -47,6 +47,8 @@ class Player(pygame.sprite.Sprite):
             self.rect.move_ip(-5, 0) 
         if pressed_keys[K_RIGHT]:
             self.rect.move_ip(5, 0)   
+
+        # screen.blit(self.surf, self.rect)
         # Keep player on the screen
         if self.rect.left < 0:
             self.rect.left = 0
@@ -78,6 +80,30 @@ class Ball(pygame.sprite.Sprite):
         self.surf = pygame.Surface((diameter, diameter), pygame.SRCALPHA)
         pygame.draw.circle(self.surf, self.color, (self.radius, self.radius), self.radius)
 
+    # def check_gravity(self):
+    #     # y_pos bottom er age porjonto gravity + hobe
+    #     if self.y_pos < SCREEN_HEIGHT - self.radius - (wall_thickness/2):
+    #         self.y_speed += gravity
+    #     else:
+    #         if self.y_speed > bounce_stop:
+    #             # bounce_stop er beshi hole (-1) opposite direction
+    #             self.y_speed = self.y_speed * -1 * self.retention
+    #         else:
+    #             # bounce_stop er kom hole speed 0 
+    #             if abs(self.y_speed) <= bounce_stop:
+    #                 self.y_speed = 0
+    #     if (self.x_pos<self.radius+ (wall_thickness/2) and self.x_speed < 0) or \
+    #             (self.x_pos > SCREEN_WIDTH - self.radius - (wall_thickness/2) and self.x_speed > 0):
+    #         self.x_speed *= -1 * self.retention
+    #         if abs(self.x_speed) < bounce_stop:
+    #             self.speed = 0
+    #     if self.y_speed == 0 and self.x_speed != 0:
+    #         if self.x_speed > 0:
+    #             self.x_speed -= self.friction
+    #         elif self.x_speed < 0:
+    #             self.x_speed += self.friction
+    #     return self.y_speed
+
 # Initialize pygame
 pygame.init()
 
@@ -94,6 +120,11 @@ gball = pygame.sprite.Group()
 all_sprites = pygame.sprite.Group()
 all_sprites.add(player)
 
+
+# Create a circular sprite
+# radius = 10
+# color = (255, 255, 255)  # White
+# ball = Ball(radius, color)
 ball = Ball(50, 50, 20, 'slate gray', 100, .8, 0, 0, 1, 0.02)
 # Add the ball sprite to the gball group
 gball.add(ball)
@@ -119,6 +150,8 @@ def draw_button(x, y, width, height, text, color):
     text_rect = text_surface.get_rect(center=(x + width // 2, y + height // 2))
     screen.blit(text_surface, text_rect)
 
+# create a font object.
+# font = pygame.font.Font('freesansbold.ttf', 20)
 black = (0, 0, 0)
 green = (0, 255, 0)
 blue = (0, 0, 128)
@@ -143,6 +176,8 @@ score = 0
 config.highest_score = 0
 running1 = True
 running_main = True
+# score_dict = {0: 'None', 0: 'None', 0: 'None', 0: 'None', 0: 'None'}
+# score_dict = sorted(score_dict.items(), key=lambda x:x[1])
 score_dict = {}
 # Variable to store the player's name
 player_name = ""
@@ -180,7 +215,8 @@ def game_over_screen(score):
                 else:
                     player_name += event.unicode
         sorted_scores = sorted(score_dict.items(), key=lambda x: x[1], reverse=True)
-
+        # Keep only the top 5 scores (if there are more than 5 entries)
+        # top_5_scores = sorted_scores[:5]
         # Fill the screen with a color
         screen.fill((0, 0, 0))
 
@@ -222,6 +258,7 @@ def game_over_screen(score):
         print_text( 200 , y_offset , 'Score : ', white, 20)
         y_offset += 30
 
+
         for name, score in top_5_scores:
             name_text = font.render(name, True, white)
             score_text = font.render(str(score), True, white)
@@ -229,10 +266,17 @@ def game_over_screen(score):
             screen.blit(score_text, (200, y_offset))
             y_offset += 30
         
+
         pygame.display.flip()
 
         clock.tick(30)
     running1 = False
+    # Save the score with the name
+    # You can implement this part based on your preferred method of storing the scores.
+    # For example, you can save it to a file or a database.
+    # For simplicity, let's just print the name and score for now:
+    print("Player Name:", player_name)
+    # print("Score:", score)
 
 def play_ground():
     # Create the screen object
@@ -251,10 +295,14 @@ def play_ground():
     gball.add(ball)
     draw_walls()
 
+
+
+# def play_game():
     global paused
     global score
     score = 0 
     while config.running: 
+        print("config.running = true")
         # for loop through the event queue
         for event in pygame.event.get():
             # Check for KEYDOWN event
@@ -262,9 +310,9 @@ def play_ground():
                 # If the Esc key is pressed, then exit the main loop
                 if event.key == K_ESCAPE:
                     game_over_screen(score)
-
+                    print("K_ESCAPE pressed")
                     config.running = False
-
+                    print("config.running = False")
                 elif event.key == K_p:
                     paused = True
                 elif event.key == K_r:
@@ -292,7 +340,7 @@ def play_ground():
             ball.create_circle_surface('Teal')
         if pygame.sprite.spritecollideany(player, gball):
             speed[1] = -speed[1]
-            score = score + 5 
+            score = score + 50 
             ball.create_circle_surface('yellow')
         if  ball.rect.bottom > SCREEN_HEIGHT:
             # game_over_screen(score)
@@ -334,14 +382,14 @@ while running_main:
         elif event.type == MOUSEBUTTONDOWN: 
             x, y = event.pos 
             if 350 <= x <= 400 and 150 <= y <= 200:
-
+                print("Start button clicked!, config.running = True")
                 config.running = True
                 play_ground()
 
             elif 350 <= x <= 400 and 250 <= y <= 300:
                 # running = False 
                 pygame.quit()  
-        
+                print("Close button clicked!")            
         
     # Clear the screen
     screen.fill((255, 255, 255))
@@ -350,5 +398,75 @@ while running_main:
     draw_button(350, 250, BUTTON_WIDTH, BUTTON_HEIGHT, "Close", (250,128,114))
 
     pygame.display.flip()
+    
+    # while config.running: 
+    #     print("config.running = true")
+    #     # for loop through the event queue
+    #     for event in pygame.event.get():
+    #         # Check for KEYDOWN event
+    #         if event.type == KEYDOWN:
+    #             # If the Esc key is pressed, then exit the main loop
+    #             if event.key == K_ESCAPE:
+    #                 game_over_screen(score)
+    #                 print("K_ESCAPE pressed")
+    #                 config.running = False
+    #                 print("config.running = False")
+    #             elif event.key == K_p:
+    #                 paused = True
+    #             elif event.key == K_r:
+    #                 paused = False 
+    #         # Check for QUIT event. If QUIT, then set running to false.
+    #         elif event.type == QUIT:
+    #             # game_over_screen(score)
+    #             config.running = False
+    #             game_over_screen(score)
+
+    #     screen.fill((0, 0, 0))  # Fill the screen with black
+    #     if not paused:
+    #         ball.rect.x += speed[0]
+    #         ball.rect.y += speed[1]
+    #     if paused:
+    #         print_text(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, "Paused", white, 30)        
+    #     if ball.rect.left < 0 :
+    #         speed[0] = -speed[0]
+    #         ball.create_circle_surface('brown')        
+    #     if ball.rect.right > SCREEN_WIDTH:
+    #         speed[0] = -speed[0]
+    #         ball.create_circle_surface('sea green')
+    #     if ball.rect.top < 0 :
+    #         speed[1] = -speed[1]
+    #         ball.create_circle_surface('Teal')
+    #     if pygame.sprite.spritecollideany(player, gball):
+    #         speed[1] = -speed[1]
+    #         score = score + 50 
+    #         ball.create_circle_surface('maroon')
+    #     if  ball.rect.bottom > SCREEN_HEIGHT:
+    #         # game_over_screen(score)
+    #         config.running = False
+    #         game_over_screen(score)
+
+    #     # Get all the keys currently pressed
+    #     pressed_keys = pygame.key.get_pressed()
+
+    #     # Update the player sprite based on user keypresses
+    #     player.update(pressed_keys)
+
+    #     walls = draw_walls()
+    #     # screen.blit(text, textRect)
+    #     print_text( 50 , SCREEN_HEIGHT - wall_thickness1/4, 'Score : ', black, 20)
+    #     print_text( 100 , SCREEN_HEIGHT - wall_thickness1/4, str(score) , black, 20)
+
+    #     print_text(650, SCREEN_HEIGHT - wall_thickness1/4, 'Highest Score : ', black, 20)
+
+    #     screen.blit(ball.surf, ball.rect)  # Draw the circular sprite
+
+    #     # Draw the player on the screen
+    #     screen.blit(player.surf, player.rect)
+
+    #     # Update the display
+    #     pygame.display.flip()
+
+    #     # Ensure program maintains a rate of 30 frames per second
+    #     clock.tick(250) 
 
 pygame.quit()
