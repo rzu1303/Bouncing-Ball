@@ -290,12 +290,13 @@ def play_ground():
         if ball.rect.top < 0 :
             speed[1] = -speed[1]
             ball.create_circle_surface('Teal')
-        if pygame.sprite.spritecollideany(player, gball):
+        if pygame.sprite.spritecollideany(player, gball) and ball.rect.y == 516:        
             speed[1] = -speed[1]
             score = score + 5 
             ball.create_circle_surface('yellow')
+            # speed[1] = speed[1] + .1
+            # speed[0] = speed[0] + .1
         if  ball.rect.bottom > SCREEN_HEIGHT:
-            # game_over_screen(score)
             config.running = False
             game_over_screen(score)
 
@@ -324,6 +325,9 @@ def play_ground():
         clock.tick(250)     
 
 running_main = True
+# Variables for speed increase
+time_elapsed = 0
+speed_increase_interval = 1
 # Main loop
 while running_main:
     # Create a font object
@@ -334,14 +338,17 @@ while running_main:
         elif event.type == MOUSEBUTTONDOWN: 
             x, y = event.pos 
             if 350 <= x <= 400 and 150 <= y <= 200:
-
                 config.running = True
                 play_ground()
 
             elif 350 <= x <= 400 and 250 <= y <= 300:
                 # running = False 
                 pygame.quit()  
-        
+        if time_elapsed >= speed_increase_interval:
+            # Increase the speed of the ball by a fixed amount or a percentage
+            speed[0] *= 1.9  # Increase the x-speed by 90% (adjust the multiplier as needed)
+            speed[1] *= 1.9  # Increase the y-speed by 90% (adjust the multiplier as needed)
+            time_elapsed = 0  # Reset the time_elapsed for the next speed increase    
         
     # Clear the screen
     screen.fill((255, 255, 255))
